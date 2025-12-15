@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts     Account[]
+  transactions Transaction[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Account {
+  id        String   @id @default(uuid())
+  accountNumber String @unique
+  balance   Decimal  @default(0) @db.Decimal(15, 2)
+  type      String   // SAVINGS, CHECKING, etc.
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromTransactions Transaction[] @relation("FromTransactions")
+  toTransactions   Transaction[] @relation("ToTransactions")
+
+  @@index([userId])
+  @@index([accountNumber])
+  @@map("accounts")
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  TRANSFER
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model Transaction {
+  id              String            @id @default(uuid())
+  type            TransactionType
+  status          TransactionStatus @default(COMPLETED)
+  amount          Decimal           @db.Decimal(15, 2)
+  description     String?
+  fromAccountId   String?
+  toAccountId     String?
+  userId          String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromAccount Account? @relation("FromTransactions", fields: [fromAccountId], references: [id])
+  toAccount   Account? @relation("ToTransactions", fields: [toAccountId], references: [id])
+
+  @@index([userId])
+  @@index([fromAccountId])
+  @@index([toAccountId])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
