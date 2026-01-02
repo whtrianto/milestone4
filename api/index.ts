@@ -63,6 +63,16 @@ export default async function handler(req: express.Request, res: express.Respons
   try {
     const app = await bootstrap();
     const expressApp = app.getHttpAdapter().getInstance();
+
+    // Vercel mounts functions under /api; strip that prefix so internal routes match
+    // e.g. incoming /api -> '/' inside the express app, /api/users -> '/users'
+    const originalUrl = req.url || '';
+    if (originalUrl.startsWith('/api')) {
+      req.url = originalUrl === '/api' ? '/' : originalUrl.slice(4);
+      // Optional logging for debugging
+      console.log(`Rewriting request URL from ${originalUrl} -> ${req.url}`);
+    }
+
     return expressApp(req, res);
   } catch (err: any) {
     // Surface the error in logs and return a helpful response for debugging
