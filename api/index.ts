@@ -59,8 +59,18 @@ async function bootstrap() {
 }
 
 export default async function handler(req: express.Request, res: express.Response) {
-  const app = await bootstrap();
-  const expressApp = app.getHttpAdapter().getInstance();
-  return expressApp(req, res);
+  try {
+    const app = await bootstrap();
+    const expressApp = app.getHttpAdapter().getInstance();
+    return expressApp(req, res);
+  } catch (err: any) {
+    // Surface the error in logs and return a helpful response for debugging
+    console.error('Serverless function initialization error:', err?.stack || err);
+    res.status(500).json({
+      statusCode: 500,
+      message: 'Server initialization failed. Check server logs for details.',
+      error: err?.message || String(err),
+    });
+  }
 }
 
