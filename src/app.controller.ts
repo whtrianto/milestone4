@@ -6,11 +6,11 @@ import { ApiExcludeController, ApiOperation, ApiResponse } from '@nestjs/swagger
 export class AppController {
   @Get()
   @ApiOperation({ summary: 'Root endpoint - Redirects to API documentation' })
-  @ApiResponse({ status: 302, description: 'Redirects to /api' })
-  @Redirect('/api', 302)
+  @ApiResponse({ status: 302, description: 'Redirects to /' })
+  @Redirect('/', 302)
   getRoot() {
-    // Redirect ke Swagger documentation
-    return { url: '/api' };
+    // Redirect ke Swagger documentation (served at root inside the function)
+    return { url: '/' };
   }
 
   @Get('health')
