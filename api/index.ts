@@ -59,8 +59,9 @@ async function bootstrap() {
       // noop
     }
 
-    // Serve Swagger at the function root so on Vercel it becomes /api/
-    SwaggerModule.setup('/', app, document);
+    // Serve Swagger at a dedicated path to ensure its static assets are namespaced
+    // Mounting at '/swagger' makes assets available under /api/swagger/* when deployed
+    SwaggerModule.setup('/swagger', app, document);
 
     await app.init();
     cachedApp = app;

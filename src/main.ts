@@ -45,8 +45,8 @@ async function bootstrap() {
     // noop
   }
 
-  // Serve Swagger at the root locally
-  SwaggerModule.setup('/', app, document);
+  // Serve Swagger at a dedicated path locally for consistency
+  SwaggerModule.setup('/swagger', app, document);
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
