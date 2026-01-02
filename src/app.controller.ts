@@ -24,12 +24,39 @@ export class AppController {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>RevoBank API Docs</title>
-    <style>body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:0;color:#0f172a;background:#f8fafc}main{max-width:1200px;margin:3rem auto;padding:1rem}</style>
+    <!-- Ensure relative URLs resolve at the site root instead of under /api -->
+    <base href="/" />
+    <style>
+      body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:0;color:#0f172a;background:#f8fafc}
+      main{max-width:1200px;margin:3rem auto;padding:1rem}
+      /* Minimal fallback styling if Redoc CSS fails to load */
+      .fallback{background:#fff;border-radius:8px;padding:1rem;color:#111}
+    </style>
   </head>
   <body>
     <main>
+      <div class="fallback" id="fallback-message" style="display:none">
+        <h1>API Documentation</h1>
+        <p>Unable to load interactive docs. You can still fetch the raw OpenAPI spec at <a href="/api/openapi.json">/api/openapi.json</a>.</p>
+      </div>
+
       <redoc spec-url="/api/openapi.json"></redoc>
       <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+      <script>
+        // Show fallback message if Redoc fails to initialize within 3s
+        setTimeout(()=>{
+          const redocEl = document.querySelector('redoc');
+          if(!redocEl || !redocEl.shadowRoot || redocEl.shadowRoot.children.length===0){
+            document.getElementById('fallback-message').style.display='block';
+          }
+        }, 3000);
+      </script>
+      <noscript>
+        <div class="fallback">
+          <h1>API Documentation (No JavaScript)</h1>
+          <p>Enable JavaScript or fetch the OpenAPI JSON directly: <a href="/api/openapi.json">/api/openapi.json</a></p>
+        </div>
+      </noscript>
     </main>
   </body>
 </html>`;
