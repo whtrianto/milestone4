@@ -4,6 +4,10 @@
 
 Secure and scalable banking API backend built with NestJS, Prisma, and PostgreSQL (Supabase-ready). This API provides comprehensive banking operations including user management, account management, and transaction processing.
 
+## DEMO
+
+- https://milestone4-blond-one.vercel.app/
+
 ## 🚀 Features
 
 ### Authentication & Authorization
