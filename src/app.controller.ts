@@ -9,11 +9,11 @@ export class AppController {
 
   @Get()
   @ApiOperation({ summary: 'Root endpoint - Redirects to API documentation' })
-  @ApiResponse({ status: 302, description: 'Redirects to /docs' })
-  @Redirect('/docs', 302)
+  @ApiResponse({ status: 302, description: 'Redirects to /api/docs' })
+  @Redirect('/api/docs', 302)
   getRoot() {
-    // Redirect to the docs page that uses Redoc and the stored OpenAPI document
-    return { url: '/docs' };
+    // Redirect to the docs page (absolute path) so when mounted at /api the redirect goes to /api/docs
+    return { url: '/api/docs' };
   }
 
   @Get('docs')
