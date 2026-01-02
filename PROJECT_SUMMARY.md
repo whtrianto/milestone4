@@ -3,7 +3,8 @@
 ## ✅ Completed Features
 
 ### 1. Database Design & Setup
-- ✅ Prisma ORM configured with MySQL
+
+- ✅ Prisma ORM configured with PostgreSQL (Supabase-ready)
 - ✅ User model with role-based access (CUSTOMER, ADMIN)
 - ✅ Account model with unique account numbers
 - ✅ Transaction model with types (DEPOSIT, WITHDRAW, TRANSFER)
@@ -12,6 +13,7 @@
 - ✅ Database seeder with sample data
 
 ### 2. Backend API (NestJS + Prisma)
+
 - ✅ Modular structure (module-service-controller pattern)
 - ✅ **Auth Module**: Register, Login with JWT
 - ✅ **User Module**: Get profile, Update profile
@@ -22,6 +24,7 @@
 - ✅ Correct HTTP status codes
 
 ### 3. Authentication & Authorization
+
 - ✅ JWT implementation with @nestjs/jwt
 - ✅ JWT guards for protected routes
 - ✅ Role-based access control
@@ -30,6 +33,7 @@
 - ✅ Password hashing with bcrypt
 
 ### 4. Testing
+
 - ✅ Jest test suite configured
 - ✅ Unit tests for Auth service
 - ✅ Unit tests for User service
@@ -39,6 +43,7 @@
 - ✅ Business logic validation tests
 
 ### 5. Documentation
+
 - ✅ Swagger/OpenAPI documentation
 - ✅ Comprehensive README
 - ✅ Deployment guide
@@ -70,14 +75,17 @@ mileston4/
 ## 🔑 API Endpoints
 
 ### Authentication
+
 - `POST /auth/register` - Register new user
 - `POST /auth/login` - Login user
 
 ### User
+
 - `GET /user/profile` - Get user profile
 - `PATCH /user/profile` - Update user profile
 
 ### Accounts
+
 - `POST /accounts` - Create account
 - `GET /accounts` - List all accounts
 - `GET /accounts/:id` - Get account details
@@ -85,6 +93,7 @@ mileston4/
 - `DELETE /accounts/:id` - Delete account
 
 ### Transactions
+
 - `POST /transactions/deposit` - Deposit money
 - `POST /transactions/withdraw` - Withdraw money
 - `POST /transactions/transfer` - Transfer money
@@ -94,6 +103,7 @@ mileston4/
 ## 🧪 Test Credentials
 
 After seeding:
+
 - **Admin**: admin@revobank.com / admin123
 - **Customer 1**: john.doe@example.com / customer123
 - **Customer 2**: jane.smith@example.com / customer123
@@ -111,6 +121,7 @@ After seeding:
 ## 📊 Database Schema
 
 ### User
+
 - id (UUID)
 - email (Unique)
 - password (Hashed)
@@ -119,6 +130,7 @@ After seeding:
 - timestamps
 
 ### Account
+
 - id (UUID)
 - accountNumber (Unique)
 - balance (Decimal)
@@ -127,6 +139,7 @@ After seeding:
 - timestamps
 
 ### Transaction
+
 - id (UUID)
 - type (DEPOSIT/WITHDRAW/TRANSFER)
 - status (PENDING/COMPLETED/FAILED)
@@ -166,4 +179,3 @@ After seeding:
 - ✅ Swagger documentation
 - ✅ Test suite included
 - ✅ Deployment ready
-

@@ -2,28 +2,32 @@
 
 # RevoBank API
 
-Secure and scalable banking API backend built with NestJS, Prisma, and MySQL. This API provides comprehensive banking operations including user management, account management, and transaction processing.
+Secure and scalable banking API backend built with NestJS, Prisma, and PostgreSQL (Supabase-ready). This API provides comprehensive banking operations including user management, account management, and transaction processing.
 
 ## 🚀 Features
 
 ### Authentication & Authorization
+
 - User registration and login with JWT authentication
 - Role-based access control (Customer & Admin)
 - Protected routes with JWT guards
 - Secure password hashing with bcrypt
 
 ### User Management
+
 - User registration and authentication
 - Profile management (view and update)
 - Role-based permissions
 
 ### Account Management
+
 - Create bank accounts with unique account numbers
 - View all accounts (own accounts for customers, all accounts for admins)
 - Update account information
 - Delete accounts (with balance validation)
 
 ### Transaction Management
+
 - **Deposit**: Add funds to an account
 - **Withdraw**: Remove funds from an account (with balance validation)
 - **Transfer**: Transfer funds between accounts
@@ -34,32 +38,54 @@ Secure and scalable banking API backend built with NestJS, Prisma, and MySQL. Th
 
 - Node.js (v18 or higher)
 - npm or yarn
-- MySQL database (or use cloud services like TigerData, Supabase)
+  -- PostgreSQL database (Supabase/Railway recommended - see `RAILWAY_SETUP.md`)
 - Git
+
+## 🚀 Quick Start dengan Railway
+
+**Project ini menggunakan PostgreSQL (Supabase/Railway) untuk database.**
+
+1. **Setup Railway Database** (Lihat `RAILWAY_SETUP.md` untuk detail lengkap)
+2. **Clone repository dan install dependencies**
+3. **Set environment variables** (gunakan `POSTGRES_PUBLIC_URL` dari Railway/Supabase)
+4. **Run migrations dan start server**
+
+Lihat `RAILWAY_SETUP.md` untuk panduan lengkap setup Railway.
 
 ## 🛠️ Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd mileston4
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
    Create a `.env` file in the root directory:
+   **Untuk Development Local dengan Postgres (Supabase/Railway):**
    ```env
-   DATABASE_URL="mysql://user:password@localhost:3306/revobank"
+   DATABASE_URL="postgresql://postgres:password@monorail.proxy.rlwy.net:5432/railway?schema=public&sslmode=require"
    JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
    JWT_EXPIRES_IN="7d"
    PORT=3000
+   NODE_ENV=development
    ```
+   **Catatan:**
+
+- Copy `POSTGRES_PUBLIC_URL` dari Railway/Supabase dashboard (Postgres service → Variables)
+- Atau gunakan `POSTGRES_URL` jika backend juga di platform yang sama
+- Lihat `.env.example` untuk template lengkap
+- Lihat `RAILWAY_SETUP.md` untuk panduan setup Railway
 
 4. **Set up Prisma**
+
    ```bash
    # Generate Prisma Client
    npm run prisma:generate
@@ -82,11 +108,13 @@ Swagger documentation will be available at `http://localhost:3000/api`
 ## 📚 API Documentation
 
 ### Swagger UI
+
 Once the server is running, visit `http://localhost:3000/api` to access the interactive Swagger documentation.
 
 ### Authentication Endpoints
 
 #### Register User
+
 ```http
 POST /auth/register
 Content-Type: application/json
@@ -99,6 +127,7 @@ Content-Type: application/json
 ```
 
 #### Login
+
 ```http
 POST /auth/login
 Content-Type: application/json
@@ -112,12 +141,14 @@ Content-Type: application/json
 ### User Endpoints
 
 #### Get Profile
+
 ```http
 GET /user/profile
 Authorization: Bearer <jwt-token>
 ```
 
 #### Update Profile
+
 ```http
 PATCH /user/profile
 Authorization: Bearer <jwt-token>
@@ -132,6 +163,7 @@ Content-Type: application/json
 ### Account Endpoints
 
 #### Create Account
+
 ```http
 POST /accounts
 Authorization: Bearer <jwt-token>
@@ -144,18 +176,21 @@ Content-Type: application/json
 ```
 
 #### Get All Accounts
+
 ```http
 GET /accounts
 Authorization: Bearer <jwt-token>
 ```
 
 #### Get Account by ID
+
 ```http
 GET /accounts/:id
 Authorization: Bearer <jwt-token>
 ```
 
 #### Update Account
+
 ```http
 PATCH /accounts/:id
 Authorization: Bearer <jwt-token>
@@ -167,6 +202,7 @@ Content-Type: application/json
 ```
 
 #### Delete Account
+
 ```http
 DELETE /accounts/:id
 Authorization: Bearer <jwt-token>
@@ -175,6 +211,7 @@ Authorization: Bearer <jwt-token>
 ### Transaction Endpoints
 
 #### Deposit
+
 ```http
 POST /transactions/deposit
 Authorization: Bearer <jwt-token>
@@ -188,6 +225,7 @@ Content-Type: application/json
 ```
 
 #### Withdraw
+
 ```http
 POST /transactions/withdraw
 Authorization: Bearer <jwt-token>
@@ -201,6 +239,7 @@ Content-Type: application/json
 ```
 
 #### Transfer
+
 ```http
 POST /transactions/transfer
 Authorization: Bearer <jwt-token>
@@ -215,12 +254,14 @@ Content-Type: application/json
 ```
 
 #### Get All Transactions
+
 ```http
 GET /transactions
 Authorization: Bearer <jwt-token>
 ```
 
 #### Get Transaction by ID
+
 ```http
 GET /transactions/:id
 Authorization: Bearer <jwt-token>
@@ -244,6 +285,7 @@ npm run test:cov
 ## 🗄️ Database Schema
 
 ### User Model
+
 - `id` (UUID, Primary Key)
 - `email` (String, Unique)
 - `password` (String, Hashed)
@@ -253,6 +295,7 @@ npm run test:cov
 - `updatedAt` (DateTime)
 
 ### Account Model
+
 - `id` (UUID, Primary Key)
 - `accountNumber` (String, Unique)
 - `balance` (Decimal)
@@ -262,6 +305,7 @@ npm run test:cov
 - `updatedAt` (DateTime)
 
 ### Transaction Model
+
 - `id` (UUID, Primary Key)
 - `type` (Enum: DEPOSIT, WITHDRAW, TRANSFER)
 - `status` (Enum: PENDING, COMPLETED, FAILED)
@@ -287,11 +331,13 @@ npm run test:cov
 ### Database Deployment
 
 #### Option 1: TigerData
+
 1. Create an account on [TigerData](https://tigerdata.com)
-2. Create a new MySQL database
+2. Create a new Postgres database
 3. Update `DATABASE_URL` in your environment variables
 
 #### Option 2: Supabase
+
 1. Create a project on [Supabase](https://supabase.com)
 2. Get your database connection string
 3. Update `DATABASE_URL` in your environment variables
@@ -299,6 +345,7 @@ npm run test:cov
 ### Backend Deployment
 
 #### Option 1: Render
+
 1. Connect your GitHub repository to Render
 2. Set build command: `npm install && npm run build`
 3. Set start command: `npm run start:prod`
@@ -306,13 +353,15 @@ npm run test:cov
 5. Run migrations: `npm run prisma:migrate deploy`
 
 #### Option 2: Railway
+
 1. Create a new project on [Railway](https://railway.app)
 2. Connect your GitHub repository
-3. Add MySQL database service
+3. Add Postgres database service
 4. Set environment variables
 5. Deploy
 
 #### Option 3: Fly.io
+
 1. Install Fly CLI: `npm install -g @fly/cli`
 2. Login: `fly auth login`
 3. Launch: `fly launch`
@@ -324,14 +373,17 @@ npm run test:cov
 After running the seed script, you can use these credentials:
 
 **Admin:**
+
 - Email: `admin@revobank.com`
 - Password: `admin123`
 
 **Customer 1:**
+
 - Email: `john.doe@example.com`
 - Password: `customer123`
 
 **Customer 2:**
+
 - Email: `jane.smith@example.com`
 - Password: `customer123`
 
@@ -339,7 +391,7 @@ After running the seed script, you can use these credentials:
 
 - **NestJS** - Progressive Node.js framework
 - **Prisma** - Next-generation ORM
-- **MySQL** - Relational database
+  -- **PostgreSQL** - Relational database
 - **JWT** - JSON Web Tokens for authentication
 - **bcryptjs** - Password hashing
 - **class-validator** - Validation decorators
@@ -387,16 +439,19 @@ Built as part of Milestone 4 - Banking API Backend Development
 ## 🐛 Troubleshooting
 
 ### Database Connection Issues
-- Ensure MySQL is running
-- Check `DATABASE_URL` format: `mysql://user:password@host:port/database`
+
+- Ensure PostgreSQL is running (or Supabase project is active)
+- Check `DATABASE_URL` format: `postgresql://user:password@host:5432/database?schema=public&sslmode=require`
 - Verify database exists
 
 ### Migration Issues
+
 - Run `npm run prisma:generate` before migrations
 - Ensure database is accessible
 - Check Prisma schema syntax
 
 ### Authentication Issues
+
 - Verify JWT_SECRET is set
 - Check token expiration
 - Ensure Bearer token is included in headers
