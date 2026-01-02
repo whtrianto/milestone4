@@ -326,47 +326,123 @@ npm run test:cov
 - Protected routes with guards
 - SQL injection prevention (Prisma ORM)
 
-## 🚢 Deployment
+## 🚢 Deployment (Supabase + Vercel)
 
-### Database Deployment
+This project is configured for **PostgreSQL (Supabase)** and is deployable on **Vercel** as a serverless API function. Below are the recommended steps and important production notes.
 
-#### Option 1: TigerData
+### Database (Supabase)
 
-1. Create an account on [TigerData](https://tigerdata.com)
-2. Create a new Postgres database
-3. Update `DATABASE_URL` in your environment variables
+1. Create a project on https://supabase.com and add a Postgres database.
+2. In your Supabase Project → Settings → Database → **Connection string**, copy the exact **Connection string (URI)**. There may also be a **Pooler** (pgbouncer) URI — try the **direct** URI first if you encounter pooler-specific errors.
+3. Set the connection string as `DATABASE_URL` in your production environment (Vercel/Render/Railway). **Important:** paste the exact string from Supabase (no extra quotes, no whitespace).
+4. Also set the Supabase client variables used by the app:
+   - `SUPABASE_URL` (e.g. `https://<project>.supabase.co`)
+   - `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_KEY` (server-side key; keep secret)
 
-#### Option 2: Supabase
+Notes on pooler vs direct:
 
-1. Create a project on [Supabase](https://supabase.com)
-2. Get your database connection string
-3. Update `DATABASE_URL` in your environment variables
+- If you see `FATAL: Tenant or user not found` when using the pooler URI, try the direct connection string instead.
+- If you see DNS errors like `ENOTFOUND base`, the `DATABASE_URL` is malformed — verify you pasted the full URI exactly.
 
-### Backend Deployment
+### Vercel Deployment
 
-#### Option 1: Render
+This repository includes a `vercel.json` that routes `/api/*` to the serverless function and serves the static landing page from `/public/index.html`.
 
-1. Connect your GitHub repository to Render
-2. Set build command: `npm install && npm run build`
-3. Set start command: `npm run start:prod`
-4. Add environment variables
-5. Run migrations: `npm run prisma:migrate deploy`
+Key notes:
 
-#### Option 2: Railway
+- The `vercel-build` script in `package.json` runs `prisma:generate` before building to ensure the Prisma Client is available at build time.
+- Serverless functions can cold-start and have limited connection lifetimes. The Prisma service in this project is defensive: it logs DB connect failures and won't crash the whole function on startup.
+- Add these environment variables in Vercel (Production scope):
+  - `DATABASE_URL` (exact Supabase connection string)
+  - `SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+  - `JWT_SECRET`
 
-1. Create a new project on [Railway](https://railway.app)
-2. Connect your GitHub repository
-3. Add Postgres database service
-4. Set environment variables
-5. Deploy
+Routes and docs after deployment:
 
-#### Option 3: Fly.io
+- Landing page: `https://<your-vercel-domain>/` (serves `public/index.html`)
+- Redoc docs: `https://<your-vercel-domain>/api/docs` (uses stored OpenAPI JSON)
+- Swagger UI: `https://<your-vercel-domain>/api/swagger` (mounted under `/api/swagger`)
+- OpenAPI JSON: `https://<your-vercel-domain>/api/openapi.json`
+- Debug endpoints (safe; do not expose secrets):
+  - `/api/debug` — shows presence of env vars and Prisma connection status
+  - `/api/file-check` — inspects whether `public/index.html` is present in the runtime
 
-1. Install Fly CLI: `npm install -g @fly/cli`
-2. Login: `fly auth login`
-3. Launch: `fly launch`
-4. Set secrets: `fly secrets set DATABASE_URL=...`
-5. Deploy: `fly deploy`
+### Recommended Vercel settings
+
+- Add `DATABASE_URL` and other env vars under **Production** (no surrounding quotes).
+- If builds fail due to missing Prisma Client, ensure you have a `vercel-build` script that runs `prisma:generate` before `vercel` build step.
+
+---
+
+## 🔧 Local Development & Testing
+
+1. Create a `.env` in project root (use `.env.example` as template) and set:
+
+```env
+NODE_ENV=development
+PORT=3000
+DATABASE_URL="postgresql://postgres:[REDACTED]@<host>:5432/postgres?sslmode=require"
+JWT_SECRET=[REDACTED_JWT_SECRET]
+SUPABASE_URL=https://<project>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=[REDACTED_SERVICE_ROLE_KEY]
+```
+
+2. Install deps and generate Prisma client:
+
+```bash
+npm install
+npm run prisma:generate
+npm run prisma:seed  # optional
+npm run start:dev
+```
+
+3. Open local docs:
+
+- Swagger (interactive): `http://localhost:3000/api/swagger`
+- Redoc (alternative): `http://localhost:3000/api/docs`
+- Health: `http://localhost:3000/api/health`
+
+---
+
+## 🐞 Troubleshooting
+
+Common issues and quick fixes:
+
+- 500 at startup / DB connection errors:
+
+  - Verify `DATABASE_URL` is the exact connection string from Supabase (no quotes). Test parsing locally:
+    ```powershell
+    $env:DATABASE_URL = 'postgresql://user:pass@host:5432/db?sslmode=require'
+    node -e "console.log(new URL(process.env.DATABASE_URL).hostname)"
+    nslookup <hostname>
+    ```
+  - Quick connection test with Node `pg`:
+    ```bash
+    node -e "const { Client } = require('pg'); (async()=>{const c=new Client({connectionString:process.env.DATABASE_URL}); await c.connect(); console.log('connected'); await c.end();})().catch(e=>console.error(e))"
+    ```
+  - If pooler URI returns `Tenant or user not found`, switch to the direct connection string.
+
+- Blank or 404 landing page on Vercel:
+
+  - Ensure `vercel.json` routes are correct (this repo maps `/` and `/index.html` or serves landing from function if necessary).
+  - Use `/api/file-check` to confirm the runtime contains `public/index.html`.
+
+- Docs assets failing to load:
+
+  - Swagger UI assets are mounted under `/api/swagger/*` (open `https://<domain>/api/swagger`).
+  - Redoc is available at `/api/docs` and falls back to a simple HTML message if external assets fail.
+
+- Check Vercel function logs for invocation errors (Vercel Dashboard → Functions → select function and view logs).
+
+---
+
+## 🧾 Additional Notes
+
+- Keep all **service role keys** and DB credentials secret — do not commit them to the repo.
+- For production, consider using connection pooling (Prisma Data Proxy or managed poolers) and proper secrets rotation.
+
+If you'd like, I can add a short `README` badge and a summary section at the top with quick links to the live docs and health endpoints.
 
 ## 📝 Test Credentials
 
@@ -395,7 +471,7 @@ After running the seed script, you can use these credentials:
 - **JWT** - JSON Web Tokens for authentication
 - **bcryptjs** - Password hashing
 - **class-validator** - Validation decorators
-- **Swagger** - API documentation
+- **Swagger / Redoc** - API documentation
 - **Jest** - Testing framework
 
 ## 📦 Project Structure
