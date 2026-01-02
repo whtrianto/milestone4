@@ -71,6 +71,24 @@ async function bootstrap() {
 export default async function handler(req: express.Request, res: express.Response) {
   try {
     const app = await bootstrap();
+
+    // Serve the static landing page directly from the function when asked
+    const url = req.url || '';
+    if (url === '/' || url === '/index.html') {
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const p = path.join(process.cwd(), 'public', 'index.html');
+        const html = fs.readFileSync(p, 'utf8');
+        res.setHeader('Content-Type', 'text/html');
+        res.status(200).send(html);
+        return;
+      } catch (e) {
+        console.error('Error serving landing page from function:', e?.stack || e);
+        // fallthrough to express app
+      }
+    }
+
     const expressApp = app.getHttpAdapter().getInstance();
 
     // Vercel mounts functions under /api; strip that prefix so internal routes match
