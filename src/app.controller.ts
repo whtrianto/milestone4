@@ -57,6 +57,30 @@ export class AppController {
     }
   }
 
+  @Get('file-check')
+  fileCheck() {
+    const fs = require('fs');
+    const path = require('path');
+    const cwd = process.cwd();
+    const checks = [];
+    const candidates = [path.join(cwd, 'index.html'), path.join(cwd, 'public', 'index.html')];
+    for (const p of candidates) {
+      try {
+        const stat = fs.statSync(p);
+        const content = fs.readFileSync(p, { encoding: 'utf8' }).slice(0, 512);
+        checks.push({ path: p, exists: true, size: stat.size, snippet: content });
+      } catch (err: any) {
+        checks.push({ path: p, exists: false, err: err?.code || String(err) });
+      }
+    }
+
+    return {
+      status: 'ok',
+      cwd,
+      files: checks,
+    };
+  }
+
   @Get('health')
   @ApiOperation({ summary: 'Health check endpoint' })
   @ApiResponse({ status: 200, description: 'API is healthy' })
