@@ -50,7 +50,8 @@ async function bootstrap() {
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
+    // Serve Swagger at the function root so on Vercel it becomes /api/
+    SwaggerModule.setup('/', app, document);
 
     await app.init();
     cachedApp = app;
