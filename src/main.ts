@@ -37,6 +37,14 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+  // Store OpenAPI document for local dev too
+  try {
+    const { setOpenApiDocument } = await import('./swagger.store');
+    setOpenApiDocument(document);
+  } catch (e) {
+    // noop
+  }
+
   // Serve Swagger at the root locally
   SwaggerModule.setup('/', app, document);
 

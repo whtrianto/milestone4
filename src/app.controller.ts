@@ -9,11 +9,52 @@ export class AppController {
 
   @Get()
   @ApiOperation({ summary: 'Root endpoint - Redirects to API documentation' })
-  @ApiResponse({ status: 302, description: 'Redirects to /' })
-  @Redirect('/', 302)
+  @ApiResponse({ status: 302, description: 'Redirects to /docs' })
+  @Redirect('/docs', 302)
   getRoot() {
-    // Redirect ke Swagger documentation (served at root inside the function)
-    return { url: '/' };
+    // Redirect to the docs page that uses Redoc and the stored OpenAPI document
+    return { url: '/docs' };
+  }
+
+  @Get('docs')
+  docs() {
+    const html = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RevoBank API Docs</title>
+    <style>body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:0;color:#0f172a;background:#f8fafc}main{max-width:1200px;margin:3rem auto;padding:1rem}</style>
+  </head>
+  <body>
+    <main>
+      <redoc spec-url="/api/openapi.json"></redoc>
+      <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+    </main>
+  </body>
+</html>`;
+
+    return html;
+  }
+
+  @Get('openapi.json')
+  openapi() {
+    try {
+      const { getOpenApiDocument } = require('./swagger.store');
+      const doc = getOpenApiDocument();
+      if (!doc) {
+        return {
+          status: 'error',
+          message: 'OpenAPI document not ready',
+        };
+      }
+      return doc;
+    } catch (e) {
+      return {
+        status: 'error',
+        message: 'OpenAPI document not available',
+      };
+    }
   }
 
   @Get('health')

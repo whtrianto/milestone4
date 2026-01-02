@@ -50,6 +50,15 @@ async function bootstrap() {
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
+    // Store the generated OpenAPI document so we can serve it directly if needed
+    try {
+      // avoid hard dependency if file not found in some contexts
+      const { setOpenApiDocument } = await import('../src/swagger.store');
+      setOpenApiDocument(document);
+    } catch (e) {
+      // noop
+    }
+
     // Serve Swagger at the function root so on Vercel it becomes /api/
     SwaggerModule.setup('/', app, document);
 
